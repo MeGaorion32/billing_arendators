@@ -1,0 +1,166 @@
+{% extends 'users/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Редактирование пользователя" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-{% if is_admin %}primary{% else %}success{% endif %} text-white">
+                <h4>
+                    {% if is_admin %}
+                        {% trans "Редактирование пользователя" %}
+                    {% else %}
+                        {% trans "Редактирование арендатора" %}
+                    {% endif %}
+                    {{ user.get_full_name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="user-form">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="alert alert-danger">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p><strong>{{ field.label }}</strong>: {{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Email" %}</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if is_admin %}
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Роль" %}</label>
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.role.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Фамилия" %}</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Имя" %}</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Отчество" %}</label>
+                            {{ form.patronymic }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Телефон" %}</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Адрес" %}</label>
+                            {{ form.address }}
+                        </div>
+                    </div>
+                    
+                    {% if 'apartments' in form.fields %}
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5>{% trans "Привязанные объекты" %}</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if form.fields.apartments.queryset.exists %}
+                                    {% for apartment in form.fields.apartments.queryset %}
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" 
+                                                name="apartments" value="{{ apartment.id }}" 
+                                                id="apartment_{{ apartment.id }}"
+                                                {% if apartment in form.initial.apartments or apartment in user.rented_apartments.all %}checked{% endif %}>
+                                            <label class="form-check-label" for="apartment_{{ apartment.id }}">
+                                                {{ apartment.name }} ({{ apartment.address|truncatechars:20 }})
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                    {% if form.apartments.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.apartments.errors }}
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="text-muted">{% trans "Нет доступных объектов" %}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-{% if is_admin %}primary{% else %}success{% endif %} me-md-2">
+                            {% trans "Сохранить" %}
+                        </button>
+                        <a href="{% if is_admin %}{% url 'admin_dashboard' %}{% else %}{% url 'client_dashboard' %}{% endif %}" 
+                           class="btn btn-secondary">
+                            {% trans "Отмена" %}
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if 'apartments' in form.fields and is_admin %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('id_role');
+    const apartmentsSection = document.getElementById('apartments-section');
+    
+    if (roleSelect && apartmentsSection) {
+        function toggleApartments() {
+            if (roleSelect.value === 'RENTER') {
+                apartmentsSection.classList.remove('d-none');
+            } else {
+                apartmentsSection.classList.add('d-none');
+            }
+        }
+        
+        // Инициализация
+        toggleApartments();
+        
+        // Обработчик изменения
+        roleSelect.addEventListener('change', toggleApartments);
+    }
+});
+</script>
+{% endif %}
+
+<script>
+// Фикс для отправки формы
+{% comment %} document.getElementById('user-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    this.submit();
+}); {% endcomment %}
+</script>
+{% endblock %}
