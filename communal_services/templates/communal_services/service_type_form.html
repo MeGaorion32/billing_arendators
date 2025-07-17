@@ -1,0 +1,134 @@
+{% extends 'users/base.html' %}
+{% load i18n static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+<script src="{% static 'communal_services/js/communal_services.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+{% if form.errors %}
+<div class="alert alert-danger">
+    {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+            <p>{{ field }}: {{ error }}</p>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endif %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>{{ title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" id="communal-service-type-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        {{ form.name }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                        {{ form.description }}
+                    </div>
+                    
+                    <div id="division_by_tariff_block" class="form-check mb-3">
+                        {{ form.division_by_tariff }}
+                        <label class="form-check-label" for="{{ form.division_by_tariff.id_for_label }}">
+                            {{ form.division_by_tariff.label }}
+                        </label>
+                    </div>
+                    
+                    <div id="had_general_tariff_block" class="form-check mb-3">
+                        {{ form.had_general_tariff }}
+                        <label class="form-check-label" for="{{ form.had_general_tariff.id_for_label }}">
+                            {{ form.had_general_tariff.label }}
+                        </label>
+                    </div>
+                    
+                    <div id="had_parent_block" class="form-check mb-3">
+                        {{ form.had_parent }}
+                        <label class="form-check-label" for="{{ form.had_parent.id_for_label }}">
+                            {{ form.had_parent.label }}
+                        </label>
+                        {% if form.had_parent.help_text %}
+                            <small class="form-text text-muted">{{ form.had_parent.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group" id="parent-type-field">
+                        <label for="{{ form.parent_type.id_for_label }}">{{ form.parent_type.label }}</label>
+                        {{ form.parent_type }}
+                    </div>
+                    
+                    <div class="form-group" id="tariff-1-field">
+                        <label for="{{ form.tariff_1.id_for_label }}">{{ form.tariff_1.label }}</label>
+                        {{ form.tariff_1 }}
+                    </div>
+                    
+                    <div class="form-group" id="tariff-2-field">
+                        <label for="{{ form.tariff_2.id_for_label }}">{{ form.tariff_2.label }}</label>
+                        {{ form.tariff_2 }}
+                    </div>
+                    
+                    <div class="form-group" id="tariff-3-field">
+                        <label for="{{ form.tariff_3.id_for_label }}">{{ form.tariff_3.label }}</label>
+                        {{ form.tariff_3 }}
+                    </div>
+                    
+                    <div class="form-group" id="default-tariff-field">
+                        <label for="{{ form.default_tariff.id_for_label }}">{{ form.default_tariff.label }}</label>
+                        {{ form.default_tariff }}
+                    </div>
+                    
+                    <div class="form-group" id="general-tariff-field">
+                        <label for="{{ form.general_tariff.id_for_label }}">{{ form.general_tariff.label }}</label>
+                        {{ form.general_tariff }}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">{% trans "Сохранить" %}</button>
+                        <a href="{% url 'communal_services:service_edit' service.pk %}" class="btn btn-secondary">
+                            {% trans "Отмена" %}
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Принудительно показываем все поля, которые должны быть видны при загрузке
+    const form = document.getElementById('communal-service-type-form');
+    if (form) {
+        const divisionChecked = form.querySelector('#id_division_by_tariff').checked;
+        const generalChecked = form.querySelector('#id_had_general_tariff').checked;
+        const parentChecked = form.querySelector('#id_had_parent').checked;
+        
+        if (divisionChecked) {
+            document.querySelectorAll('#tariff-1-field, #tariff-2-field, #tariff-3-field').forEach(el => {
+                el.style.display = 'block';
+            });
+        }
+        if (generalChecked) {
+            document.querySelector('#general-tariff-field').style.display = 'block';
+        }
+        if (parentChecked) {
+            document.querySelector('#parent-type-field').style.display = 'block';
+            if (document.querySelector('#id_parent_type').value) {
+                document.querySelectorAll('#tariff-1-field, #tariff-2-field, #tariff-3-field, #default-tariff-field').forEach(el => {
+                    el.style.display = 'block';
+                });
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

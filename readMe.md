@@ -27,3 +27,6 @@ Renter123
 
 **Тестовый пароль для арендадатора:**
 RClient123
+
+Чтобы узнать версию passenger на beget:
+python -c "import django; print(django.get_version()); print(django.__file__)"

@@ -43,7 +43,10 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">{% trans "Настройки" %}</a>
+                                 <a class="nav-link {% if 'communal_services' in request.path %}active{% endif %}" 
+                                href="{% url 'communal_services:service_list' %}">
+                                {% trans "Настройки" %}
+                            </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#">{% trans "Отчеты" %}</a>
@@ -94,6 +97,8 @@
             </div>
             {% endfor %}
         {% endif %}
+
+        {% block extra_head %}{% endblock %}
         
         {% block content %}{% endblock %}
     </div>

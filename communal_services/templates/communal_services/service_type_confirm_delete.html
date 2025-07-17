@@ -1,0 +1,28 @@
+{% extends 'users/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Удаление типа услуги" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4>{% trans "Удаление типа услуги" %}</h4>
+            </div>
+            <div class="card-body">
+                <p>{% trans "Вы уверены, что хотите удалить тип услуги" %} "{{ service_type.name }}"?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">{% trans "Удалить" %}</button>
+                        <a href="{% url 'communal_services:service_edit' service.pk %}" class="btn btn-secondary">
+                            {% trans "Отмена" %}
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
