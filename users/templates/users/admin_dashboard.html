@@ -3,6 +3,11 @@
 
 {% block title %}{% trans "Панель администратора" %}{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+{% endblock %}
+
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>{% trans "Панель администратора" %}</h2>
@@ -38,12 +43,20 @@
                         <td>{{ user.phone }}</td>
                         <td>{{ user.address|truncatechars:30 }}</td>
                         <td>
-                            <a href="{% url 'update_user' user.pk %}" class="btn btn-sm btn-primary">
+                            {% comment %} <a href="{% url 'update_user' user.pk %}" class="btn btn-sm btn-primary">
                                 {% trans "Изменить" %}
                             </a>
                             <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.pk }}">
                                 {% trans "Удалить" %}
-                            </button>
+                            </button> {% endcomment %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'update_user' user.pk %}" class="btn btn-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.pk }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                             
                             <!-- Modal -->
                             <div class="modal fade" id="deleteUserModal{{ user.pk }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.pk }}" aria-hidden="true">
@@ -118,6 +131,7 @@
                         <th>{% trans "Арендатор" %}</th>
                         <th>{% trans "Телефон" %}</th>
                         <th>{% trans "Адрес" %}</th>
+                        <th>{% trans "Типы услуг" %}</th>
                         <th>{% trans "Дата начала" %}</th>
                         <th>{% trans "Дата окончания" %}</th>
                         <th>{% trans "Действия" %}</th>
@@ -128,21 +142,36 @@
                     <tr>
                         <td>{{ apartment.name }}</td>
                         <td>{{ apartment.owner.get_full_name }}</td>
-                        <td>{{ apartment.renter.get_full_name }}</td>
+                        <td>{{ apartment.renter.get_full_name|default:"-" }}</td>
                         <td>{{ apartment.phone }}</td>
                         <td>{{ apartment.address|truncatechars:30 }}</td>
+                        <td>
+                            {% for type in apartment.communal_service_types.all %}
+                                <span class="badge bg-secondary">{{ type.name }}</span>
+                            {% empty %}
+                                -
+                            {% endfor %}
+                        </td>
                         <td>{{ apartment.date_first }}</td>
                         <td>{{ apartment.date_end }}</td>
                         <td>
-                            <a href="{% url 'apartments:update_apartment' apartment.pk %}" class="btn btn-sm btn-primary">{% trans "Изменить" %}</a>
+                            {% comment %} <a href="{% url 'apartments:update_apartment' apartment.pk %}" class="btn btn-sm btn-primary">{% trans "Изменить" %}</a> {% endcomment %}
                             {% comment %} <a href="#" class="btn btn-sm btn-primary">{% trans "Изменить" %}</a> {% endcomment %}
                             {% comment %} <form action="{% url 'apartments:delete_apartment' apartment.pk %}" method="post" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-danger">{% trans "Удалить" %}</button>
                             </form> {% endcomment %}
-                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteObjectModal{{ apartment.pk }}">
+                            {% comment %} <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteObjectModal{{ apartment.pk }}">
                                 {% trans "Удалить" %}
-                            </button>
+                            </button> {% endcomment %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'apartments:update_apartment' apartment.pk %}" class="btn btn-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteObjectModal{{ apartment.pk }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                             
                             <!-- Modal -->
                             <div class="modal fade" id="deleteObjectModal{{ apartment.pk }}" tabindex="-1" aria-labelledby="deleteObjectModalLabel{{ apartment.pk }}" aria-hidden="true">

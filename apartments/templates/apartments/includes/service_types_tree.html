@@ -1,0 +1,114 @@
+{% load i18n static %}
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>{% trans "Доступные типы услуг" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="service-types-tree">
+                    {% for service in communal_services %}
+                        <div class="service-item mb-3">
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="btn btn-sm btn-link toggle-children p-0 me-2" 
+                                        data-children-id="service-{{ service.id }}-types">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                                <strong>{{ service.name }}</strong>
+                            </div>
+                            <div id="service-{{ service.id }}-types" class="ms-4 mt-2">
+                                {% for type in service.types.all %}
+                                    {% if not type.had_parent %} {# Показываем только корневые типы #}
+                                        {% include 'apartments/includes/service_type_item.html' with service_type=type %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>{% trans "Выбранные типы услуг" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="selected-types-list" class="list-group">
+                    {% for service_type in selected_types %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ service_type.name }} ({{ service_type.communal_service.name }})
+                            <button type="button" class="btn btn-sm btn-danger remove-type" data-type-id="{{ service_type.id }}">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted">{% trans "Нет выбранных типов" %}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" name="communal_service_types" id="communal_service_types" value="{% for type in selected_types %}{{ type.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработка выбора типа
+    document.querySelectorAll('.select-type').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const typeId = this.dataset.typeId;
+            const hiddenInput = document.getElementById('id_selected_types');
+            let selectedIds = hiddenInput.value ? hiddenInput.value.split(',') : [];
+            
+            if (!selectedIds.includes(typeId)) {
+                selectedIds.push(typeId);
+                hiddenInput.value = selectedIds.join(',');
+                
+                // Добавляем в список выбранных
+                const typeName = this.dataset.typeName;
+                const serviceName = this.dataset.serviceName;
+                const newItem = document.createElement('div');
+                newItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                newItem.innerHTML = `
+                    ${typeName} (${serviceName})
+                    <button type="button" class="btn btn-sm btn-danger remove-type" data-type-id="${typeId}">
+                        <i class="bi bi-x"></i>
+                    </button>
+                `;
+                document.getElementById('selected-types-list').appendChild(newItem);
+                
+                // Добавляем обработчик удаления
+                newItem.querySelector('.remove-type').addEventListener('click', function() {
+                    removeType(typeId);
+                });
+            }
+        });
+    });
+    
+    // Обработка удаления типа
+    document.querySelectorAll('.remove-type').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const typeId = this.dataset.typeId;
+            removeType(typeId);
+        });
+    });
+    
+    function removeType(typeId) {
+        const hiddenInput = document.getElementById('id_selected_types');
+        let selectedIds = hiddenInput.value ? hiddenInput.value.split(',') : [];
+        selectedIds = selectedIds.filter(id => id !== typeId);
+        hiddenInput.value = selectedIds.join(',');
+        
+        // Удаляем из списка выбранных
+        document.querySelectorAll('#selected-types-list .list-group-item').forEach(item => {
+            if (item.querySelector('.remove-type').dataset.typeId === typeId) {
+                item.remove();
+            }
+        });
+    }
+});
+</script>

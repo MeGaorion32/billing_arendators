@@ -1,0 +1,40 @@
+/* Стили для дерева */
+
+.service-item {
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    margin-bottom: 10px;
+}
+
+.service-item:hover {
+    background-color: #e9ecef;
+}
+
+#service-types-tree {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+#selected-types-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.toggle-children {
+    text-decoration: none;
+}
+
+.service-type-item {
+    padding: 5px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+.service-type-item:hover {
+    background-color: #f8f9fa;
+}
+
+
+
+
